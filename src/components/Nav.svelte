@@ -21,7 +21,7 @@
     </div>
 
     <button
-        class="bg-pink-500 hover:bg-pink-600 px-4 py-1 rounded-md text-white font-medium"
+        class="bg-neutral-700 hover:bg-neutral-600 px-4 py-1 rounded-md text-white font-medium"
         onclick={deployToVercel}
     >
         Deploy to Vercel

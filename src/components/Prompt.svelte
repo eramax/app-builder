@@ -1,6 +1,16 @@
 <script>
     import { userPrompt, isStreaming } from '../lib/store';
 
+    function onSubmit() {
+        if ($userPrompt.trim()) {
+            // Emit the user prompt to the parent component or handle it here
+            // For example, you might want to call a function to process the prompt
+            console.log('User Prompt:', $userPrompt);
+            userPrompt.set(''); // Clear the input after submission
+        }
+    }
+
+
 </script>
 
 <div class="bg-app-dark p-3 border-t border-gray-800 flex">

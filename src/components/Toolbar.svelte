@@ -6,8 +6,8 @@
     {#each Object.keys($files) as filename}
         <button
             class="px-3 py-1 rounded-md text-sm"
-            class:bg-pink-500={filename === $activeFile}
-            class:bg-app-gray={filename !== $activeFile}
+            class:bg-neutral-500={filename === $activeFile}
+            class:bg-neutral-800={filename !== $activeFile}
             onclick={() => $activeFile = filename}
             disabled={$isStreaming}
         >
