@@ -1,4 +1,4 @@
-import { writable, get } from 'svelte/store';
+import { writable, get, derived } from 'svelte/store';
 
 export const userPrompt = writable("");
 export const isStreaming = writable(false);
@@ -26,3 +26,19 @@ export const loadDemoFiles = async () => {
         "app.js": js
     });
 };
+
+// Create a valid HTML structure
+export const preview = derived(files, ($files) => {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>${$files["app.css"]}</style>
+    </head>
+    <body>
+        ${$files["index.html"]}
+        <script>${$files["app.js"]}</script>
+    </body>
+    </html>`;
+});

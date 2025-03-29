@@ -35,3 +35,16 @@ export async function* streamLLMResponse(codeSnippet, prompt) {
     yield `Error: ${error.message}`;
   }
 }
+
+async function handleSubmit() {
+  if (!$userPrompt.trim() || $isStreaming) return;
+
+  $isStreaming = true;
+  const generator = streamLLMResponse($files[$activeFile], $userPrompt);
+
+  for await (const response of generator) {
+      $files[$activeFile] = response;
+  }
+
+  $isStreaming = false;
+}

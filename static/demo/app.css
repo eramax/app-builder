@@ -1,3 +1,33 @@
-* {
-    box-sizing: border-box;
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh;
+    font-family: "Arial", sans-serif;
+    text-align: center;
+}
+
+.arrow {
+    position: absolute;
+    bottom: 32px;
+    left: 0px;
+    width: 100px;
+    transform: rotate(30deg);
+}
+
+h1 {
+    font-size: 50px;
+}
+
+h1 span {
+    color: #acacac;
+    font-size: 32px;
+}
+
+@media screen and (max-width: 640px) {
+    .arrow {
+        top: 12px;
+        left: 56px;
+        transform: rotate(180deg);
+    }
 }
