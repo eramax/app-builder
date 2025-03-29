@@ -1,0 +1,46 @@
+@import "tailwindcss";
+/* Root styles */
+:root {
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Editor styling */
+.line-numbers {
+  color: #6b7280;
+  text-align: right;
+  padding-right: 1rem;
+  user-select: none;
+  font-family: monospace;
+}
+
+.code-editor {
+  font-family: monospace;
+  background-color: #1a1a1a;
+  color: white;
+  padding: 1rem;
+  overflow: auto;
+  height: 100%;
+  tab-size: 2;
+}
+
+.preview-panel {
+  background-color: white;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  height: calc(100% - 2rem);
+}
+
+/* Syntax highlighting classes */
+.token-tag { color: #60a5fa; }
+.token-attribute { color: #fbbf24; }
+.token-string { color: #34d399; }
+.token-comment { color: #6b7280; }
+.token-keyword { color: #c084fc; }
