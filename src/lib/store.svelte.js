@@ -53,6 +53,33 @@ function createSiteStore() {
     set files(value) { files = value; },
     
     get preview() { return preview; },
+
+      get activeFileLanguage() {
+        if (!activeFile) return 'plaintext';
+        const extension = activeFile.split('.').pop().toLowerCase();
+        const languageMap = {
+          js: 'javascript',
+          jsx: 'javascript',
+          ts: 'typescript',
+          tsx: 'typescript',
+          html: 'html',
+          htm: 'html',
+          css: 'css',
+          scss: 'scss',
+          less: 'less',
+          json: 'json',
+          md: 'markdown',
+          markdown: 'markdown',
+          py: 'python',
+          sh: 'shell',
+          bash: 'shell',
+          yml: 'yaml',
+          yaml: 'yaml',
+          xml: 'xml',
+          svg: 'xml'
+        };
+        return languageMap[extension] || 'plaintext';
+      },
     
     loadDemoFiles
   };

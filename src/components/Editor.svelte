@@ -1,18 +1,78 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { siteStore } from "$lib/store.svelte";
-  
-  let editor;
-  
-  onMount(() => {
-    // Initialize editor here if needed
-    // For simplicity, we're using a textarea
+  import loader from "@monaco-editor/loader";
+
+  let editorContainer;
+  let monacoEditor;
+  let monaco;
+
+  $effect(() => {
+    // Update editor language when active file changes
+    const newLanguage = siteStore.activeFileLanguage;
+    if (
+      monacoEditor &&
+      newLanguage !== monacoEditor.getModel().getLanguageId()
+    ) {
+      monacoEditor.getModel().setLanguage(newLanguage);
+    }
+  });
+
+  $effect(() => {
+    // Update editor content when file content changes externally
+    const activeFile = siteStore.activeFile;
+    const fileContent = siteStore.files[activeFile];
+
+    if (
+      monacoEditor &&
+      fileContent !== undefined &&
+      monacoEditor.getValue() !== fileContent
+    ) {
+      monacoEditor.setValue(fileContent);
+    }
+  });
+
+  onMount(async () => {
+    monaco = await loader.init();
+
+    const activeFile = siteStore.activeFile;
+    const language = siteStore.activeFileLanguage;
+    const content = siteStore.files[activeFile] || "";
+
+    monacoEditor = monaco.editor.create(editorContainer, {
+      value: content,
+      language,
+      theme: "vs-dark",
+      automaticLayout: true,
+      minimap: { enabled: false },
+      scrollBeyondLastLine: false,
+      formatOnPaste: true,
+      formatOnType: true,
+      tabSize: 2,
+      wordWrap: "on",
+      scrollbar: {
+        vertical: "visible",
+        horizontal: "visible",
+      },
+    });
+
+    // Optimize content change handler with debounce
+    let timeout;
+    monacoEditor.onDidChangeModelContent(() => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        if (siteStore.activeFile) {
+          siteStore.files[siteStore.activeFile] = monacoEditor.getValue();
+        }
+      }, 200);
+    });
+  });
+
+  onDestroy(() => {
+    if (monacoEditor) {
+      monacoEditor.dispose();
+    }
   });
 </script>
 
-<textarea 
-  bind:value={siteStore.files[siteStore.activeFile]} 
-  class="w-full h-full bg-[#1e1e1e] text-[#d4d4d4] font-mono text-sm p-4 border-none resize-none outline-none"
-  placeholder="Enter your code here..."
-  bind:this={editor}
-></textarea>
+<div bind:this={editorContainer} class="w-full h-full"></div>
