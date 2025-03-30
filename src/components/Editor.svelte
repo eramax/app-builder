@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import { siteStore } from "../store.svelte";
+  import { siteStore } from "$lib/store.svelte";
   
   let editor;
   

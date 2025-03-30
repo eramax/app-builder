@@ -1,5 +1,5 @@
 <script>
-  import { siteStore } from "../store.svelte";
+  import { siteStore } from "$lib/store.svelte";
 
   async function handleSubmit() {
     if (!siteStore.userPrompt.trim()) return;

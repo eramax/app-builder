@@ -1,9 +1,9 @@
 <script>
-    import { siteStore } from "../lib/store.svelte";
-    import Editor from "../lib/components/Editor.svelte";
-    import Preview from "../lib/components/Preview.svelte";
-    import Prompt from "../lib/components/Prompt.svelte";
-    import Navigation from "../lib/components/Navigation.svelte";
+    import { siteStore } from "$lib/store.svelte";
+    import Editor from "$components/Editor.svelte";
+    import Preview from "$components/Preview.svelte";
+    import Prompt from "$components/Prompt.svelte";
+    import Navigation from "$components/Navigation.svelte";
     import { onMount } from "svelte";
   
     onMount(() => {

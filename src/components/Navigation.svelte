@@ -1,5 +1,5 @@
 <script>
-  import { siteStore } from "../store.svelte";
+  import { siteStore } from "$lib/store.svelte";
   
   const fileTypes = {
     "index.html": "HTML",
