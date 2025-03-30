@@ -7,10 +7,25 @@
     let editor;
     let monaco;
 
-    function getEditorConfig(content) {
+    function getLanguageFromFilename(filename) {
+        const extension = filename.split('.').pop()?.toLowerCase();
+        switch (extension) {
+            case 'js': return 'javascript';
+            case 'css': return 'css';
+            case 'json': return 'json';
+            case 'md': return 'markdown';
+            case 'ts': return 'typescript';
+            case 'jsx': return 'javascript';
+            case 'tsx': return 'typescript';
+            case 'html': return 'html';
+            default: return 'html';
+        }
+    }
+
+    function getEditorConfig(content, filename) {
         return {
             value: content,
-            language: "html",
+            language: getLanguageFromFilename(filename),
             theme: "vs-dark",
             automaticLayout: true,
             minimap: { enabled: true },
@@ -25,7 +40,7 @@
         if (!editorContainer || !monaco) return;
         editor = monaco.editor.create(
             editorContainer,
-            getEditorConfig(content),
+            getEditorConfig(content, $activeFile),
         );
 
         // Event listener for content changes
@@ -63,7 +78,14 @@
         const fileContent = $files[currentFile];
 
         if (editor && fileContent !== editor.getValue()) {
+            // Update editor content
             editor.setValue(fileContent);
+            
+            // Update language mode if file changed
+            const model = editor.getModel();
+            if (model) {
+                monaco.editor.setModelLanguage(model, getLanguageFromFilename(currentFile));
+            }
         }
     });
 </script>
