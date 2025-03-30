@@ -1,25 +1,15 @@
 <script>
     import { files, activeFile } from "../lib/store";
     import { onMount } from "svelte";
-    
     import loader from "@monaco-editor/loader";
 
     let editorContainer;
     let editor;
+    let monaco;
 
-    onMount(async () => {
-        const monaco = await loader.init();
-        console.log("Monaco Editor loaded");
-        monaco.languages.html.htmlDefaults.setOptions({
-            format: {
-                tabSize: 2,
-                insertSpaces: true,
-                wrapAttributes: "auto",
-                wrapAttributesIndentSize: 2,
-            },
-        });
-        editor = monaco.editor.create(editorContainer, {
-            value: $files[$activeFile],
+    function getEditorConfig(content) {
+        return {
+            value: content,
             language: "html",
             theme: "vs-dark",
             automaticLayout: true,
@@ -28,21 +18,52 @@
             formatOnPaste: true,
             formatOnType: true,
             scrollBeyondLastLine: false,
-        });
+        };
+    }
 
+    function initializeEditor(content) {
+        if (!editorContainer || !monaco) return;
+        editor = monaco.editor.create(
+            editorContainer,
+            getEditorConfig(content),
+        );
+
+        // Event listener for content changes
         editor.onDidChangeModelContent(() => {
             const newValue = editor.getValue();
             if ($files[$activeFile] !== newValue) {
+                const position = editor.getPosition();
                 $files[$activeFile] = newValue;
+                if (position) editor.setPosition(position);
             }
         });
-        return () => editor?.dispose();
+    }
+
+    onMount(async () => {
+        try {
+            monaco = await loader.init();
+            console.log("Monaco Editor loaded");
+
+            initializeEditor($files[$activeFile]);
+        } catch (error) {
+            console.error("Failed to load Monaco editor:", error);
+        }
+
+        // Proper cleanup
+        return () => {
+            if (editor) {
+                editor.dispose();
+                editor = null;
+            }
+        };
     });
 
     $effect(() => {
-        console.log("activeFile changed", $activeFile);
-        if (editor && $files[$activeFile] !== editor.getValue()) {
-            editor.setValue($files[$activeFile]);
+        const currentFile = $activeFile;
+        const fileContent = $files[currentFile];
+
+        if (editor && fileContent !== editor.getValue()) {
+            editor.setValue(fileContent);
         }
     });
 </script>
