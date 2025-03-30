@@ -1,31 +1,66 @@
 <script>
+    import { siteStore } from "../lib/store.svelte";
+    import Editor from "../lib/components/Editor.svelte";
+    import Preview from "../lib/components/Preview.svelte";
+    import Prompt from "../lib/components/Prompt.svelte";
+    import Navigation from "../lib/components/Navigation.svelte";
     import { onMount } from "svelte";
-    import Editor from "../components/Editor.svelte";
-    import Preview from "../components/Preview.svelte";
-    import Toolbar from "../components/Toolbar.svelte";
-    import Prompt from "../components/Prompt.svelte";
-    import Nav from "../components/Nav.svelte";
-    import { loadDemoFiles } from "../lib/store";
-
-    onMount(async () => {
-        await loadDemoFiles();
+  
+    onMount(() => {
+      siteStore.loadDemoFiles();
     });
-</script>
-
-<main class="flex flex-col h-screen bg-app-darker">
-    <Nav />
-
-    <div class="flex flex-1 overflow-hidden">
-        <!-- Left panel: Code editor -->
-        <div class="w-1/2 border-r border-gray-800 flex flex-col">
-            <Toolbar />
-            <Editor />
-            <Prompt />
+  </script>
+  
+  <div class="app">
+    <div class="layout">
+      <div class="left-panel">
+        <Prompt />
+        <div class="editor-container">
+          <Navigation />
+          <Editor />
         </div>
-
-        <!-- Right panel: Preview -->
-        <div class="w-1/2 p-4 bg-app-dark">
-            <Preview />
-        </div>
+      </div>
+      <div class="preview-container">
+        <Preview />
+      </div>
     </div>
-</main>
+  </div>
+  
+  <style>
+    .app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+  
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      flex-grow: 1;
+      height: 100%;
+      padding: 1rem;
+    }
+  
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      height: 100%;
+    }
+  
+    .editor-container {
+      background-color: #1e1e1e;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+  
+    .preview-container {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+  </style>
