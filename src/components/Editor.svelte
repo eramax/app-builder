@@ -12,22 +12,7 @@
 
 <textarea 
   bind:value={siteStore.files[siteStore.activeFile]} 
-  class="editor"
+  class="w-full h-full bg-[#1e1e1e] text-[#d4d4d4] font-mono text-sm p-4 border-none resize-none outline-none"
   placeholder="Enter your code here..."
   bind:this={editor}
 ></textarea>
-
-<style>
-  .editor {
-    width: 100%;
-    height: 100%;
-    background-color: #1e1e1e;
-    color: #d4d4d4;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 14px;
-    padding: 1rem;
-    border: none;
-    resize: none;
-    outline: none;
-  }
-</style>

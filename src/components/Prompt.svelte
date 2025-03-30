@@ -26,57 +26,21 @@
   }
 </script>
 
-<div class="prompt-container">
-  <form on:submit|preventDefault={handleSubmit} class="prompt-form">
+<div class="w-full">
+  <form on:submit|preventDefault={handleSubmit} class="flex gap-2">
     <input
       type="text"
       placeholder="Describe your website..."
       bind:value={siteStore.userPrompt}
       disabled={siteStore.isStreaming}
+      class="flex-grow p-3 border border-gray-700 rounded bg-app-gray text-white text-base"
     />
-    <button type="submit" disabled={siteStore.isStreaming || !siteStore.userPrompt.trim()}>
+    <button 
+      type="submit" 
+      disabled={siteStore.isStreaming || !siteStore.userPrompt.trim()}
+      class="px-4 py-3 bg-app-blue text-white border-none rounded text-base cursor-pointer transition-colors hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed"
+    >
       {siteStore.isStreaming ? 'Generating...' : 'Generate'}
     </button>
   </form>
 </div>
-
-<style>
-  .prompt-container {
-    width: 100%;
-  }
-
-  .prompt-form {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  input {
-    flex-grow: 1;
-    padding: 0.75rem;
-    border: 1px solid #3c3c3c;
-    border-radius: 4px;
-    background-color: #1e1e1e;
-    color: #ffffff;
-    font-size: 1rem;
-  }
-
-  button {
-    padding: 0.75rem 1rem;
-    background-color: #007acc;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  button:hover:not(:disabled) {
-    background-color: #0098ff;
-  }
-
-  button:disabled {
-    background-color: #555555;
-    cursor: not-allowed;
-  }
-</style>

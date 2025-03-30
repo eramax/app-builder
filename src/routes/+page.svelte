@@ -11,56 +11,17 @@
     });
   </script>
   
-  <div class="app">
-    <div class="layout">
-      <div class="left-panel">
+  <div class="h-screen flex flex-col">
+    <div class="grid grid-cols-2 gap-4 flex-grow h-full p-4">
+      <div class="flex flex-col gap-4 h-full">
         <Prompt />
-        <div class="editor-container">
+        <div class="bg-[#1e1e1e] rounded-lg flex flex-col flex-grow overflow-hidden">
           <Navigation />
           <Editor />
         </div>
       </div>
-      <div class="preview-container">
+      <div class="bg-white rounded-lg overflow-hidden">
         <Preview />
       </div>
     </div>
   </div>
-  
-  <style>
-    .app {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-  
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      flex-grow: 1;
-      height: 100%;
-      padding: 1rem;
-    }
-  
-    .left-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      height: 100%;
-    }
-  
-    .editor-container {
-      background-color: #1e1e1e;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-      overflow: hidden;
-    }
-  
-    .preview-container {
-      background-color: white;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-  </style>
