@@ -1,20 +1,15 @@
 <script>
     import { files, activeFile } from "../lib/store";
     import { onMount } from "svelte";
+    
     import loader from "@monaco-editor/loader";
 
     let editorContainer;
     let editor;
 
-    $effect(() => {
-        if (editor && $files[$activeFile] !== editor.getValue()) {
-            editor.setValue($files[$activeFile]);
-        }
-    });
-
     onMount(async () => {
         const monaco = await loader.init();
-        console.log("Monaco Editor loaded", monaco);
+        console.log("Monaco Editor loaded");
         monaco.languages.html.htmlDefaults.setOptions({
             format: {
                 tabSize: 2,
@@ -41,11 +36,17 @@
                 $files[$activeFile] = newValue;
             }
         });
-
         return () => editor?.dispose();
+    });
+
+    $effect(() => {
+        console.log("activeFile changed", $activeFile);
+        if (editor && $files[$activeFile] !== editor.getValue()) {
+            editor.setValue($files[$activeFile]);
+        }
     });
 </script>
 
 <div class="flex-1 bg-app-darker">
-    <div bind:this={editorContainer} class="w-full h-full" />
+    <div bind:this={editorContainer} class="w-full h-full"></div>
 </div>
