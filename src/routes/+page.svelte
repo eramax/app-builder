@@ -8,6 +8,7 @@
   
     onMount(() => {
       siteStore.loadDemoFiles();
+      siteStore.loadSystemPrompt();
     });
   </script>
   

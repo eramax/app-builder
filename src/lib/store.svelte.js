@@ -1,10 +1,13 @@
 // Site builder state management using Svelte runes
+import { get } from "svelte/store";
+import JSZip from "jszip";
 
 function createSiteStore() {
   let userPrompt = $state("");
   let isStreaming = $state(false);
   let activeFile = $state("index.html");
   let files = $state({});
+  let systemPrompt = "";
 
   // Generate preview combining all files
   let preview = $derived(`
@@ -20,7 +23,6 @@ function createSiteStore() {
     </body>
     </html>`);
 
-
   return {
     get userPrompt() { return userPrompt; },
     set userPrompt(value) { userPrompt = value; },
@@ -35,6 +37,8 @@ function createSiteStore() {
     set files(value) { files = value; },
 
     get preview() { return preview; },
+
+    get systemPrompt() { return systemPrompt; },
 
     get activeFileLanguage() {
       if (!activeFile) return 'plaintext';
@@ -61,6 +65,29 @@ function createSiteStore() {
         svg: 'xml'
       };
       return languageMap[extension] || 'plaintext';
+    },
+
+    async loadSystemPrompt() {
+      const res = await fetch("/system_prompt.md");
+      if (res.ok) {
+        systemPrompt = await res.text();
+      } else {
+        console.error("Failed to load system prompt:", res.statusText);
+      }
+    },
+
+    async downloadFilesasZip() {
+      const zip = new JSZip();
+      for (const [filename, content] of Object.entries(files)) {
+        zip.file(filename, content);
+      }
+      const blob = await zip.generateAsync({ type: "blob" })
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "app.zip";
+      a.click();
+      URL.revokeObjectURL(url);
     },
 
     async loadDemoFiles() {
