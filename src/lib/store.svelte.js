@@ -16,11 +16,11 @@ function createSiteStore() {
     <html>
     <head>
       <meta charset="UTF-8">
-      <style>${files["app.css"] || ""}</style>
+      ${files["app.css"] ? `<style>${files['app.css']}</style>` : ""}
     </head>
     <body>
       ${files["index.html"] || ""}
-      <script>${files["app.js"] || ""}</script>
+      ${files["app.js"] ? `<script>${files["app.js"]}</script>` : ""}
     </body>
     </html>`);
 

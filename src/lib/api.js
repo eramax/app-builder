@@ -43,6 +43,7 @@ export async function askAI() {
   let aiResponse = '';
   let filename = "";
   let processedFiles = new Set();
+  siteStore.files = {};
 
   // Regex to match filenames with extensions (e.g., index.html, style.css)
   const fileNamePattern = /[\w-]+\.\w+/;
@@ -117,5 +118,6 @@ export async function askAI() {
     siteStore.aiResponse = `Error: ${error.message}`;
   } finally {
     siteStore.isStreaming = false;
+    siteStore.userPrompt = "";
   }
 }

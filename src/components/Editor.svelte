@@ -29,6 +29,7 @@
       monacoEditor.getValue() !== fileContent
     ) {
       monacoEditor.setValue(fileContent);
+      monacoEditor.revealLine(monacoEditor.getModel().getLineCount())
     }
   });
 
