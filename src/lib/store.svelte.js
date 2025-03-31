@@ -7,6 +7,7 @@ function createSiteStore() {
   let isStreaming = $state(false);
   let activeFile = $state("index.html");
   let files = $state({});
+  let currentWritableFile = $state("");
   let systemPrompt = "";
 
   // Generate preview combining all files
@@ -35,6 +36,9 @@ function createSiteStore() {
 
     get files() { return files; },
     set files(value) { files = value; },
+
+    get currentWritableFile() { return currentWritableFile; },
+    set currentWritableFile(value) { currentWritableFile = value; },
 
     get preview() { return preview; },
 

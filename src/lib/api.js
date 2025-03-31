@@ -11,127 +11,111 @@ const openai = new OpenAI({
   },
 });
 
-async function* streamLLMResponse(prompt) {
-  try {
-    const stream = await openai.chat.completions.create({
-      model: import.meta.env.VITE_LLM_MODEL,
-      // temperature: 0.3,
-      // max_tokens: 16000,
-      messages: [
-        {
-          role: 'system',
-          content: siteStore.systemPrompt
-        },
-        {
-          role: 'user',
-          content: `${prompt}`
-        }
-      ],
-      stream: true
-    });
-
-    let responseText = '';
-
-    for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content || '';
-      responseText += content;
-      yield responseText;
-    }
-  } catch (error) {
-    console.error('Error streaming from LLM:', error);
-    yield `Error: ${error.message}`;
-  }
-}
-
-function parseFileContents(responseText) {
-  const fileContents = {};
-  const fileRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
-  let match;
+// Function to simulate streaming in debug mode
+async function streamMockData() {
+  // Fetch mock data from aiResponse.md
+  const response = await fetch('/aiResponse.md');
+  const mockData = await response.text();
   
-  while ((match = fileRegex.exec(responseText)) !== null) {
-    const fileName = match[1];
-    const content = match[2].trim();
-    fileContents[fileName] = content;
-  }
+  // Split into small chunks (simulating streaming)
+  const chunks = mockData.split('').reduce((acc, char, i) => {
+    const chunkIndex = Math.floor(i / 10); // 10 characters per chunk
+    acc[chunkIndex] = (acc[chunkIndex] || '') + char;
+    return acc;
+  }, []);
   
-  return fileContents;
-}
-
-// Parse partial response to extract potential file content
-function parsePartialResponse(responseText) {
-  const fileContents = {};
-  
-  // Look for complete file tags
-  const completeFileRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
-  let match;
-  while ((match = completeFileRegex.exec(responseText)) !== null) {
-    const fileName = match[1];
-    const content = match[2].trim();
-    fileContents[fileName] = content;
-  }
-  
-  // Look for opened but not closed file tags (for in-progress files)
-  const openTags = [...responseText.matchAll(/<([^>]+)>/g)];
-  for (const openTag of openTags) {
-    const tagName = openTag[1];
-    const closeTagRegex = new RegExp(`</${tagName}>`, 'g');
-    
-    // If there's no matching close tag
-    if (!closeTagRegex.test(responseText.substring(openTag.index))) {
-      const startIndex = openTag.index + openTag[0].length;
-      const partialContent = responseText.substring(startIndex).trim();
-      
-      // Only update if we have content and the file isn't already completely parsed
-      if (partialContent && !fileContents[tagName]) {
-        fileContents[tagName] = partialContent;
+  return {
+    async *[Symbol.asyncIterator]() {
+      for (const chunk of chunks) {
+        // Add a small random delay between chunks
+        await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 150));
+        yield { choices: [{ delta: { content: chunk } }] };
       }
     }
-  }
-  
-  return fileContents;
+  };
 }
 
 export async function askAI() {
-  const prompt = siteStore.userPrompt.trim()
+  const prompt = siteStore.userPrompt.trim();
   if (!prompt || siteStore.isStreaming) return;
 
   siteStore.isStreaming = true;
-  const generator = streamLLMResponse(prompt);
-  
-  let finalResponse = '';
-  let activeFileSet = false;
-  
-  for await (const response of generator) {
-    finalResponse = response;
-    siteStore.files.response = response;
-    
-    // Parse the partial response to extract file contents
-    const fileContents = parsePartialResponse(response);
-    
-    // Update each file in the store
-    for (const [fileName, content] of Object.entries(fileContents)) {
-      siteStore.files[fileName] = content;
+  let aiResponse = '';
+  let filename = "";
+  let processedFiles = new Set();
+
+  // Regex to match filenames with extensions (e.g., index.html, style.css)
+  const fileNamePattern = /[\w-]+\.\w+/;
+
+  try {
+    // Use mock data in debug mode, otherwise use OpenAI API
+    const stream = import.meta.env.VITE_MODE === 'debug' 
+      ? await streamMockData()
+      : await openai.chat.completions.create({
+          model: import.meta.env.VITE_LLM_MODEL,
+          messages: [
+            { role: 'system', content: siteStore.systemPrompt },
+            { role: 'user', content: prompt }
+          ],
+          stream: true
+        });
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content || '';
+      if (!content) continue;
+
+      // Add new content to the accumulated response
+      aiResponse += content;
       
-      // Set active file to the first file in the response if not already set
-      if (!activeFileSet) {
-        siteStore.activeFile = fileName;
-        activeFileSet = true;
+      // Process completed files first
+      // Match pairs like <index.html>content</index.html> where the tag name contains a dot
+      const completedFileTags = [...aiResponse.matchAll(/<([\w-]+\.\w+)>(.*?)<\/\1>/gs)];
+      for (const match of completedFileTags) {
+        const fileTag = match[1];
+        if (fileNamePattern.test(fileTag) && !processedFiles.has(fileTag)) {
+          siteStore.files[fileTag] = match[2].trim();
+          processedFiles.add(fileTag);
+          console.log('File completed:', fileTag);
+          
+          // If this was our active file, clear it
+          if (fileTag === filename) {
+            filename = '';
+          }
+        }
+      }
+
+      // Now look for new open tags for files not yet processed
+      // Match tags like <index.html> that don't have a closing tag yet and contain a dot
+      const openTags = [...aiResponse.matchAll(/<([\w-]+\.\w+)>(?!.*<\/\1>)/g)];
+      for (const tag of openTags) {
+        const potentialFilename = tag[1];
+        // Check if it's a valid filename with extension and not already processed
+        if (fileNamePattern.test(potentialFilename) && !processedFiles.has(potentialFilename) && potentialFilename !== filename) {
+          filename = potentialFilename;
+          siteStore.activeFile = filename;
+          siteStore.files[filename] = '';
+          
+          // Update the current file content
+          const startIndex = aiResponse.indexOf(`<${filename}>`) + filename.length + 2;
+          siteStore.files[filename] = aiResponse.slice(startIndex).trim();
+          break; // Focus on one new file at a time
+        }
+      }
+      
+      // Update content for current active file if it exists and isn't processed
+      if (filename && !processedFiles.has(filename)) {
+        const startIndex = aiResponse.indexOf(`<${filename}>`) + filename.length + 2;
+        siteStore.files[filename] = aiResponse.slice(startIndex).trim();
       }
     }
+
+    // Log complete response after streaming ends
+    console.log('Complete AI Response:', aiResponse);
+
+  } catch (error) {
+    console.error('Error streaming from LLM:', error);
+    siteStore.aiResponse = `Error: ${error.message}`;
+  } finally {
+    siteStore.isStreaming = false;
   }
-  
-  // Final parse to ensure all files are properly extracted
-  const completeFileContents = parseFileContents(finalResponse);
-  
-  // Update with the final complete content
-  for (const [fileName, content] of Object.entries(completeFileContents)) {
-    siteStore.files[fileName] = content;
-  }
-  
-  // Ensure active file is set to one of the complete files
-  if (Object.keys(completeFileContents).length > 0 && !activeFileSet) {
-    siteStore.activeFile = Object.keys(completeFileContents)[0];
-  }
-  
-  siteStore.isStreaming = false;
 }
